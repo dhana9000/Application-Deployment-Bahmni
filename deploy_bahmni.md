@@ -1,4 +1,4 @@
-## Application deployment (Bahmni) using fresh DB
+## Application deployment (Bahmni)
 ### Use of Bahmni
 * Bahmni is an easy-to-use EMR & hospital system.
 * It combines and enhances existing open source products into a single solution.
