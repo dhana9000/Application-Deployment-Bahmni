@@ -1,0 +1,37 @@
+---
+- hosts: all
+  remote_user: root
+  vars:
+    bahmni_install:
+      - https://kojipkgs.fedoraproject.org//packages/zlib/1.2.11/19.fc30/x86_64/zlib-1.2.11-19.fc30.x86_64.rpm
+      - https://dl.bintray.com/bahmni/rpm/rpms/bahmni-installer-0.92-147.noarch.rpm
+  tasks:
+    - name: This executes only on centos machine
+      fail:
+        msg: unsupported distribution
+      when: ansible_distribution != 'CentOS'
+    - name: installation of Bahmni
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ bahmni_install }}"
+    - name: setup a configuration file for bahmni command in /etc/bahmni-installer
+      template :
+        src : /tmp/setup.yml.j2
+        dest : /etc/bahmni-installer/setup.yml
+    - name: Copy the required config folder to /etc/bahmni-installer/deployment-artifacts
+      copy:
+        src: /tmp/hospital_config
+        dest: /etc/bahmni-installer/deployment-artifacts/
+    - name: Set the inventory file name to local in BAHMNI_INVENTORY environment variable
+      shell:
+        cmd: echo "export BAHMNI_INVENTORY=local" >> ~/.bashrc
+      notify:
+        - refresh .bashrc
+    - name: Now fire the installer
+      shell: bahmni install
+  handlers:
+    - name: refresh .bashrc
+      shell: source ~/.bashrc
+      args: 
+        executable: /bin/bash
